@@ -5,9 +5,20 @@ class GameState extends Phaser.Plugins.BasePlugin{
 
     start(){
         super.start();
-        this.pollutionPerTick = 0.05;
+
+        //Placeholder values
+        this.pollutionPerTick = 2;
         this.globalPollution = 40;
+
+        this.globalHappiness = 50;
+        this.globalPop = 20;
+
+        this.balanceMoney = 60;
+        this.moneyPerTick = 4;
+
+        this.coalPlants = new PowerPlant("Coal", 10, 10);
     }
+
 
     getPollutionPerTick(){
         return this.pollutionPerTick;
@@ -15,6 +26,28 @@ class GameState extends Phaser.Plugins.BasePlugin{
 
     getGlobalPollution(){
         return this.globalPollution;
+    }
+
+    /**
+     * @param {String} newBuilding
+     */
+    addBuilding(newBuilding){
+        switch(newBuilding.toLowerCase()){
+            case "coal":
+                this.coalPlants.createBuilding();
+                break;
+        }
+    }
+
+    /**
+     * @param {String} toBeRemoved
+     */
+    removeBuilding(toBeRemoved){
+        switch(toBeRemoved.toLowerCase()){
+            case "coal":
+                this.coalPlants.destroyBuilding();
+                break;
+        }
     }
 
 }
@@ -35,20 +68,59 @@ class SceneA extends Phaser.Scene {
 
     create(){
         let self = this;
-        //Create new instances of UI elements
-        this.button = new buttonBase(self, 360, 1150, 'greenRectNormal', 'greenRectTapped',
-            'Policies', '#FFFFFF', 1, 0.75, 2);
-        this.pollutionBar = new progressBarBase(self, 100, 1000, 'cornerSquare', 0xa36643, 2);
-        this.happinessBar = new progressBarBase(self, 620, 1000, 'cornerSquare', 0x00ff00, 2);
-        //Set the function to run when button is pressed, along with the args (using ...args)
-        this.button.setDownFunction(this.loadSceneB, self);
 
+        //Create new instances of UI elements
+        this.actionButton = new buttonBase(self, 360, 1150, 'greenRectNormal', 'greenRectTapped',
+            'Policies', '#FFFFFF', 1, 0.75, 2);
+
+        this.pollutionBar = new progressBarBase(self, 100, 1000, 'cornerSquare', 0xa36643, 2);
+        this.pollutionBar.setProgress(this.gamestate.globalPollution);
+        this.happinessBar = new progressBarBase(self, 620, 1000, 'cornerSquare', 0x00ff00, 2);
+
+        //Set the function to run when button is pressed, along with the args (using ...args)
+        this.actionButton.setDownFunction(this.loadSceneB, self);
+
+        let d = new Date();
+        this.startTime = d.getTime();
+
+        this.updateTime = 5000; //1000 ms = 1 s
+
+        this.isGameRunning = true;
+        this.isGameFinished = false;
+
+
+        this.gamestate.addBuilding("coal");
+
+        //Temp test button
+        this.addPowerPlantButton = new buttonBase(self, 360, 1000, 'greenRectNormal', 'greenRectTapped',
+            'Add Coal Plant', '#FFFFFF' ,1, 0.75, 1.5);
+        this.addPowerPlantButton.setDownFunction(this.addPowerPlant, self);
+        this.delPowerPlantButton = new buttonBase(self, 360, 800, 'greenRectNormal', 'greenRectTapped',
+            'Del Coal Plant', '#FFFFFF' ,1, 0.75, 1.5);
+        this.delPowerPlantButton.setDownFunction(this.delPowerPlant, self);
+
+
+        this.energyText = this.add.text(360, 150, "");
+        this.energyText.setScale(4);
+        this.energyText.setText(this.calculateEnergy().toString());
 
     }
 
     update(){
-        if(this.gamestate.globalPollution<=100){
-            this.updatePollution();
+        if(this.isGameRunning && !this.isGameFinished) {
+            //Update stuff per this.updateTime second
+            let d = new Date();
+            let deltaTime = d.getTime() - this.startTime;
+            //Do things when the game updates
+            if (deltaTime > this.updateTime) {
+                this.updatePollution();
+                this.startTime = d.getTime();
+            }
+
+            if(this.gamestate.getGlobalPollution()>100){
+                this.isGameRunning=false;
+                this.gameFinished();
+            }
         }
     }
 
@@ -65,6 +137,38 @@ class SceneA extends Phaser.Scene {
     updatePollution(){
         this.gamestate.globalPollution+=(this.gamestate.pollutionPerTick);
         this.pollutionBar.setProgress(this.gamestate.globalPollution);
+    }
+
+    gameFinished() {
+        //TODO show text and add button to play again
+        this.isGameFinished=true;
+        console.log("Game finished");
+    }
+
+    calculateEnergy(){
+        let res=0;
+        res+=this.gamestate.coalPlants.getNetEnergy();
+        return res;
+    }
+
+    /**
+     *
+     * @param {Array} args
+     */
+    addPowerPlant(args){
+        let self = args[0];
+        self.gamestate.addBuilding("coal");
+        self.energyText.setText(self.calculateEnergy().toString());
+    }
+
+    /**
+     *
+     * @param {Array} args
+     */
+    delPowerPlant(args){
+        let self = args[0];
+        self.gamestate.removeBuilding("coal");
+        self.energyText.setText(self.calculateEnergy().toString());
     }
 }
 

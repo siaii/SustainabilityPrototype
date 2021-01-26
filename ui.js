@@ -8,6 +8,20 @@ class buttonBase{
         console.log("up");
     };
     downFunctionArgs;
+
+    /**
+     *
+     * @param {Phaser.Scene}self
+     * @param {int} xPos
+     * @param {int} yPos
+     * @param {string} textureUp
+     * @param {string} textureDown
+     * @param {string} text
+     * @param {string} textColor
+     * @param {number} scaleX
+     * @param {number} scaleY
+     * @param {number} textScale
+     */
     constructor(self, xPos, yPos, textureUp, textureDown, text = '', textColor='#FFFFFF', scaleX = 1, scaleY = 1, textScale = 1) {
         this.normalTexture = textureUp;
         this.downTexture = textureDown;
@@ -24,6 +38,11 @@ class buttonBase{
         this.buttonObject.on('pointerup', this.onButtonUp, this);
     }
 
+    /**
+     *
+     * @param {function} func
+     * @param {array} arg
+     */
     setDownFunction(func, ...arg){
         this.downFunction = func;
         this.downFunctionArgs = arg;
@@ -49,6 +68,17 @@ class buttonBase{
 //General progress bar for progress/loading, scaling pivot at bottom
 class progressBarBase{
     scaleX = 0.15;
+
+    /**
+     *
+     * @param {Phaser.Scene} self
+     * @param {number} xPos
+     * @param {number} yPos
+     * @param {string} texture
+     * @param {string} color
+     * @param {number} maxScale
+     * @param {boolean} isVertical
+     */
     constructor(self, xPos, yPos, texture, color, maxScale, isVertical = true) {
         this.barBackground = self.add.image(xPos, yPos, texture);
         this.barObject = self.add.image(xPos, yPos, texture);
@@ -69,11 +99,12 @@ class progressBarBase{
         }
     }
 
+    /**
+     *
+     * @param {number} val
+     */
     //Set value of the bar, from 0-100
     setProgress(val){
-        // if(val==0){
-        //     val = Phaser.Math.EPSILON
-        // }else
         if(val<0 || val>100){
             console.log("Invalid Value");
         }else{
