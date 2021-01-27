@@ -16,9 +16,17 @@ class GameState extends Phaser.Plugins.BasePlugin{
         this.balanceMoney = 60;
         this.moneyPerTick = 4;
 
+        this.totalBuildingCount=0;
         this.coalPlants = new PowerPlant("Coal", 10, 10);
+
+        this.isInitialized = false;
+
+        this.updateBuildingCount();
     }
 
+    updateBuildingCount(){
+        this.totalBuildingCount=this.coalPlants.buildingCount;
+    }
 
     getPollutionPerTick(){
         return this.pollutionPerTick;
@@ -26,6 +34,10 @@ class GameState extends Phaser.Plugins.BasePlugin{
 
     getGlobalPollution(){
         return this.globalPollution;
+    }
+
+    updateMoneyPerTick(){
+        this.moneyPerTick=Math.max(4, this.globalHappiness/10);
     }
 
     /**
@@ -37,6 +49,7 @@ class GameState extends Phaser.Plugins.BasePlugin{
                 this.coalPlants.createBuilding();
                 break;
         }
+        this.updateBuildingCount();
     }
 
     /**
@@ -48,8 +61,16 @@ class GameState extends Phaser.Plugins.BasePlugin{
                 this.coalPlants.destroyBuilding();
                 break;
         }
+        this.updateBuildingCount();
     }
 
+    getBuildingCount(name){
+        switch(name.toLowerCase()){
+            case "coal":
+                return this.coalPlants.buildingCount;
+                break;
+        }
+    }
 }
 
 //Main scene
@@ -62,6 +83,8 @@ class SceneA extends Phaser.Scene {
         //Load assets
         this.load.image('greenRectNormal', 'assets/greenRectNormal.png');
         this.load.image('greenRectTapped', 'assets/greenRectTapped.png');
+        this.load.image('yellowRectNormal', 'assets/yellowRectNormal.png');
+        this.load.image('yellowRectTapped', 'assets/yellowRectTapped.png');
         this.load.image('cornerSquare', 'assets/cornerSquare.png');
         this.load.image('backBtn', 'assets/backBtn.png');
     }
@@ -70,12 +93,12 @@ class SceneA extends Phaser.Scene {
         let self = this;
 
         //Create new instances of UI elements
-        this.actionButton = new buttonBase(self, 360, 1150, 'greenRectNormal', 'greenRectTapped',
-            'Policies', '#FFFFFF', 1, 0.75, 2);
+        this.actionButton = new ButtonBase(self, 540, 1750, 'greenRectNormal', 'greenRectTapped',
+            'Policies', '#FFFFFF', 1.5, 1.2, 3);
 
-        this.pollutionBar = new progressBarBase(self, 100, 1000, 'cornerSquare', 0xa36643, 2);
+        this.pollutionBar = new ProgressBarBase(self, 100, 1500, 'cornerSquare', 0xa36643, 4);
         this.pollutionBar.setProgress(this.gamestate.globalPollution);
-        this.happinessBar = new progressBarBase(self, 620, 1000, 'cornerSquare', 0x00ff00, 2);
+        this.happinessBar = new ProgressBarBase(self, 980, 1500, 'cornerSquare', 0x00ff00, 4);
 
         //Set the function to run when button is pressed, along with the args (using ...args)
         this.actionButton.setDownFunction(this.loadSceneB, self);
@@ -88,21 +111,14 @@ class SceneA extends Phaser.Scene {
         this.isGameRunning = true;
         this.isGameFinished = false;
 
-
-        this.gamestate.addBuilding("coal");
-
-        //Temp test button
-        this.addPowerPlantButton = new buttonBase(self, 360, 1000, 'greenRectNormal', 'greenRectTapped',
-            'Add Coal Plant', '#FFFFFF' ,1, 0.75, 1.5);
-        this.addPowerPlantButton.setDownFunction(this.addPowerPlant, self);
-        this.delPowerPlantButton = new buttonBase(self, 360, 800, 'greenRectNormal', 'greenRectTapped',
-            'Del Coal Plant', '#FFFFFF' ,1, 0.75, 1.5);
-        this.delPowerPlantButton.setDownFunction(this.delPowerPlant, self);
-
-
-        this.energyText = this.add.text(360, 150, "");
+        this.energyText = this.add.text(540, 150, "");
         this.energyText.setScale(4);
         this.energyText.setText(this.calculateEnergy().toString());
+
+        if(!this.gamestate.isInitialized){
+            this.gamestate.addBuilding("coal");
+            this.gamestate.isInitialized=true;
+        }
 
     }
 
@@ -151,26 +167,21 @@ class SceneA extends Phaser.Scene {
         return res;
     }
 
-    /**
-     *
-     * @param {Array} args
-     */
-    addPowerPlant(args){
-        let self = args[0];
-        self.gamestate.addBuilding("coal");
-        self.energyText.setText(self.calculateEnergy().toString());
-    }
 
-    /**
-     *
-     * @param {Array} args
-     */
-    delPowerPlant(args){
-        let self = args[0];
-        self.gamestate.removeBuilding("coal");
-        self.energyText.setText(self.calculateEnergy().toString());
-    }
 }
+
+
+
+/**
+ *      #############################
+ *      #############################
+ *      DIVIDER FOR BETTER VISIBILITY
+ *      #############################
+ *      #############################
+ */
+
+
+
 
 class SceneB extends Phaser.Scene{
     constructor() {
@@ -183,20 +194,86 @@ class SceneB extends Phaser.Scene{
 
     create(){
         let self = this;
-        let backButton = new buttonBase(self, 50, 50, 'backBtn', 'backBtn', "", '#FFFFFF', 0.25, 0.25);
+        let backButton = new ButtonBase(self, 100, 120, 'backBtn', 'backBtn', "", '#FFFFFF', 0.5, 0.5);
         backButton.setDownFunction(function(){
             self.scene.start('sceneA');
         });
 
-        let addEnergyTaxButton = new buttonBase(self, 200, 200, 'greenRectNormal',
-            'greenRectTapped', "Add Energy Tax", '#FFFFFF',  0.9, 0.75, 1.2);
-        let addCleanEnergySubsidyButton = new buttonBase(self, 200, 350,
-            'greenRectNormal', 'greenRectTapped', "Add Clean Energy Subsidy", '#FFFFFF', 0.9, 0.75, 1.2);
-        let promoteElectricVehicle = new buttonBase(self, 200, 500, 'greenRectNormal',
-            'greenRectTapped', "Subsidy Electric Vehicle", '#FFFFFF', 0.9, 0.75, 1.2)
+
+        //Group for deciding policy
+        this.policyGroup = new UiGroup();
+
+        let addEnergyTaxButton = new ButtonBase(self, 300, 300, 'greenRectNormal',
+            'greenRectTapped', "Add Energy Tax", '#FFFFFF',  1.3, 1, 2);
+        let addCleanEnergySubsidyButton = new ButtonBase(self, 300, 500,
+            'greenRectNormal', 'greenRectTapped', "Add Clean Energy Subsidy", '#FFFFFF', 1.3, 1, 2);
+        let promoteElectricVehicle = new ButtonBase(self, 300, 700, 'greenRectNormal',
+            'greenRectTapped', "Subsidy Electric Vehicle", '#FFFFFF', 1.3, 1, 2)
+
+        this.policyGroup.add(addEnergyTaxButton);
+        this.policyGroup.add(addCleanEnergySubsidyButton);
+        this.policyGroup.add(promoteElectricVehicle);
+
+        //Group for deciding building actions
+        this.buildingGroup = new UiGroup();
+
+        //TODO Maybe group this into an object for easier creation
+        let coalText = this.add.text(100, 200, "Coal Power Plant").setScale(3);
+        let coalCountText = this.add.text(700, 350, "-1").setScale(3);
+        coalCountText.setText(this.gamestate.getBuildingCount("coal"));
+        let addPowerPlantButton = new ButtonBase(self, 200, 400, 'greenRectNormal', 'greenRectTapped',
+            'Build', '#FFFFFF' ,0.7, 1, 3);
+        addPowerPlantButton.setDownFunction(this.addPowerPlant, self, coalCountText, "coal");
+        let delPowerPlantButton = new ButtonBase(self, 500, 400, 'greenRectNormal', 'greenRectTapped',
+            'Destroy', '#FFFFFF' ,0.7, 1, 3);
+        delPowerPlantButton.setDownFunction(this.delPowerPlant, self, coalCountText, "coal");
+
+        this.buildingGroup.add(coalCountText);
+        this.buildingGroup.add(coalText);
+        this.buildingGroup.add(addPowerPlantButton);
+        this.buildingGroup.add(delPowerPlantButton);
+        this.buildingGroup.disable();
+
+
+        //Buttons to choose build or policy
+        this.policyButton = new ButtonBase(self, 270, 1750, 'yellowRectNormal',
+            'yellowRectTapped', "Policies", '#FFFFFF', 1.3, 1, 3);
+        this.policyButton.setDownFunction(this.enablePolicyGroup, self);
+
+        this.buildingButton = new ButtonBase(self, 810, 1750, 'yellowRectNormal',
+            'yellowRectTapped', "Buildings", '#FFFFFF', 1.3, 1, 3);
+        this.buildingButton.setDownFunction(this.enableBuildingGroup, self);
     }
 
     update(){
 
+    }
+
+    addPowerPlant(args){
+        let self = args[0];
+        let countText = args[1];
+        let type = args[2];
+        self.gamestate.addBuilding(type);
+        countText.setText(self.gamestate.getBuildingCount(type));
+    }
+
+    delPowerPlant(args){
+        let self = args[0];
+        let countText = args[1];
+        let type = args[2];
+        self.gamestate.removeBuilding("coal");
+        countText.setText(self.gamestate.getBuildingCount(type));
+    }
+
+    enablePolicyGroup(args){
+        let self = args[0];
+        self.buildingGroup.disable();
+        self.policyGroup.enable();
+    }
+
+    enableBuildingGroup(args){
+        let self = args[0];
+        self.policyGroup.disable();
+        self.buildingGroup.enable();
     }
 }

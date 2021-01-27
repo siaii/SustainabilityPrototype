@@ -4,8 +4,8 @@ var config = {
         mode: Phaser.Scale.FIT,
         parent: 'phaser-example',
         autoCenter: Phaser.Scale.CENTER_BOTH,
-        width: 720,
-        height: 1280,
+        width: 1080,
+        height: 1920,
     },
     backgroundColor: '#AAAAFF',
     scene: [SceneA, SceneB],
@@ -14,6 +14,16 @@ var config = {
     }
 };
 
+//Add disable and enable method for phaser's builtin text gameobject
+Phaser.GameObjects.Text.prototype.disable = function(){
+    this.setActive(false)
+    this.setVisible(false);
+}
+
+Phaser.GameObjects.Text.prototype.enable = function(){
+    this.setActive(true)
+    this.setVisible(true);
+}
 var game = new Phaser.Game(config);
 
 

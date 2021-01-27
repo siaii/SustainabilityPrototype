@@ -1,5 +1,5 @@
 
-class buttonBase{
+class ButtonBase {
     downFunction = function(){
         console.log("down");
     };
@@ -36,12 +36,13 @@ class buttonBase{
         //Setup pointer (both mouse and touch) events
         this.buttonObject.on('pointerdown', this.onButtonDown, this);
         this.buttonObject.on('pointerup', this.onButtonUp, this);
+        this.buttonObject.on('pointerout', this.onButtonUp, this);
     }
 
     /**
      *
      * @param {function} func
-     * @param {array} arg
+     * @param arg
      */
     setDownFunction(func, ...arg){
         this.downFunction = func;
@@ -59,15 +60,19 @@ class buttonBase{
     }
 
     disable(){
-        this.buttonObject.setAlpha(0);
-        this.buttonText.setAlpha(0);
-        this.buttonObject.setInteractive(false);
+        this.buttonObject.setActive(false).setVisible(false);
+        this.buttonText.setActive(false).setVisible(false);
+    }
+
+    enable(){
+        this.buttonObject.setActive(true).setVisible(true);
+        this.buttonText.setActive(true).setVisible(true);
     }
 }
 
 //General progress bar for progress/loading, scaling pivot at bottom
-class progressBarBase{
-    scaleX = 0.15;
+class ProgressBarBase {
+    scaleX = 0.25;
 
     /**
      *
@@ -113,5 +118,62 @@ class progressBarBase{
         }
 
     }
+
+    disable(){
+        this.barBackground.setActive(false).setVisible(false);
+        this.barObject.setActive(false).setVisible(false);
+    }
+
+    enable(){
+        this.barBackground.setActive(true).setVisible(true);
+        this.barObject.setActive(true).setVisible(true);
+    }
+}
+
+class UiGroup{
+    constructor() {
+        this.members=[];
+    }
+
+    add(newObject){
+        this.members.push(newObject);
+    }
+
+    remove(toBeRemoved){
+        let i;
+        let temp=[]
+        for(i=0;i<this.members.length; i++){
+            if(this.members[0]!=toBeRemoved){
+                temp.push(this.members[0]);
+                this.members.shift();
+            }else{
+                let tempObj = this.members[0];
+                this.members.shift();
+                tempObj.disable();
+            }
+        }
+        for(i=0; i<temp.length; i++){
+            this.members.push(temp[i]);
+        }
+    }
+
+    getMembers(){
+        return this.members;
+    }
+
+    disable(){
+        let i;
+        for(i=0; i<this.members.length; i++){
+            this.members[i].disable();
+        }
+    }
+
+    enable(){
+        let i;
+        for(i=0; i<this.members.length; i++){
+            this.members[i].enable();
+        }
+    }
+
 }
 

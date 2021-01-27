@@ -5,11 +5,13 @@ class Building{
      * @param {int} energyChange
      * @param {int} pollutionChange
      */
-    constructor(name, energyChange, pollutionChange) {
+    constructor(name, energyChange, pollutionChange, cost) {
         this.name = name;
         this.energy = energyChange;
         this.pollution = pollutionChange;
+        this.buildingCost = cost;
         this.buildingCount = 0;
+
 
         this.energyModifier = 1;
         this.pollutionModifier = 1;
@@ -54,14 +56,11 @@ class Building{
         console.log(this.name+" count: "+this.buildingCount);
     }
 
-    getCount(){
-        return this.buildingCount;
-    }
 }
 
 class PowerPlant extends Building{
-    constructor(name, energyChange, pollutionChange) {
-        super(name, energyChange, pollutionChange);
+    constructor(name, energyChange, pollutionChange, cost = 100) {
+        super(name, energyChange, pollutionChange, cost);
 
         this.energyMultiplier = 1;
         this.pollutionMultiplier = 1;
@@ -69,8 +68,8 @@ class PowerPlant extends Building{
 }
 
 class PollutionProcessor extends Building{
-    constructor(name, energyChange, pollutionChange) {
-        super(name, energyChange, pollutionChange);
+    constructor(name, energyChange, pollutionChange, cost = 100) {
+        super(name, energyChange, pollutionChange, cost);
 
         this.energyMultiplier = -1;
         this.pollutionMultiplier = -1;
