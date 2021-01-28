@@ -68,6 +68,18 @@ class ButtonBase {
         this.buttonObject.setActive(true).setVisible(true);
         this.buttonText.setActive(true).setVisible(true);
     }
+
+    setActive(val){
+        this.buttonObject.setActive(val);
+        if(val){
+            this.buttonObject.setInteractive();
+            this.buttonObject.setTint(0xffffff);
+        }
+        else{
+            this.buttonObject.disableInteractive();
+            this.buttonObject.setTint(0x555555);
+        }
+    }
 }
 
 //General progress bar for progress/loading, scaling pivot at bottom

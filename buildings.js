@@ -30,6 +30,10 @@ class Building{
         return this.buildingCount*this.pollution*this.pollutionModifier*this.pollutionMultiplier;
     }
 
+    getBuildingCost(){
+        return this.buildingCost;
+    }
+
     /**
      *
      * @param {int} val
@@ -59,7 +63,7 @@ class Building{
 }
 
 class PowerPlant extends Building{
-    constructor(name, energyChange, pollutionChange, cost = 100) {
+    constructor(name, energyChange, pollutionChange, cost = 15) {
         super(name, energyChange, pollutionChange, cost);
 
         this.energyMultiplier = 1;
@@ -68,7 +72,7 @@ class PowerPlant extends Building{
 }
 
 class PollutionProcessor extends Building{
-    constructor(name, energyChange, pollutionChange, cost = 100) {
+    constructor(name, energyChange, pollutionChange, cost = 15) {
         super(name, energyChange, pollutionChange, cost);
 
         this.energyMultiplier = -1;
