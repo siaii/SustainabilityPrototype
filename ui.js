@@ -122,12 +122,11 @@ class ProgressBarBase {
      */
     //Set value of the bar, from 0-100
     setProgress(val){
-        if(val<0 || val>100){
-            console.log("Invalid Value");
-        }else{
-            let finalScale = (val/100) * this.scaleAtMax;
-            this.barObject.setScale(this.scaleX, finalScale);
-        }
+        val = Math.max(0, val);
+        val = Math.min(100, val);
+        let finalScale = (val/100) * this.scaleAtMax;
+        this.barObject.setScale(this.scaleX, finalScale);
+
 
     }
 
@@ -145,6 +144,7 @@ class ProgressBarBase {
 class UiGroup{
     constructor() {
         this.members=[];
+        this.identifier="";
     }
 
     add(newObject){
@@ -185,6 +185,14 @@ class UiGroup{
         for(i=0; i<this.members.length; i++){
             this.members[i].enable();
         }
+    }
+
+    /**
+     *
+     * @param {string} name
+     */
+    setIdentifier(name){
+        this.identifier=name;
     }
 
 }

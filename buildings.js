@@ -34,6 +34,10 @@ class Building{
         return this.buildingCost;
     }
 
+    getBuildingCount(){
+        return this.buildingCount;
+    }
+
     /**
      *
      * @param {int} val
